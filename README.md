@@ -27,7 +27,7 @@ A modern web game platform built with Next.js 15, TypeScript, and Tailwind CSS. 
 
 1. Clone the repository:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/Goszila/family-game.git
    cd family-game
    ```
 
