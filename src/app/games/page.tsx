@@ -28,7 +28,7 @@ function GameCard({ game }: { game: Game }) {
           </span>
         </div>
         
-        <p className="text-gray-600 mb-4 line-clamp-2">
+        <p className="text-gray-600 mb-4">
           {game.description}
         </p>
         
@@ -53,19 +53,19 @@ function GameCard({ game }: { game: Game }) {
   );
 }
 
-export default function Home() {
+export default function GamesPage() {
   const games = getAllGames();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 pt-16">
       <div className="container mx-auto px-4 py-12">
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-gray-800 mb-4">
-            🎮 Family Game Platform
+          <h1 className="text-4xl font-bold text-gray-800 mb-4">
+            All Games
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Welcome to our free web game platform! Choose from our collection of classic games 
-            and start playing instantly in your browser.
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Browse our complete collection of games. Each game is designed to be fun, 
+            engaging, and playable directly in your browser.
           </p>
         </div>
 
@@ -75,14 +75,13 @@ export default function Home() {
           ))}
         </div>
 
-        <div className="text-center mt-12 p-6 bg-white rounded-xl shadow-lg max-w-2xl mx-auto">
-          <h2 className="text-2xl font-bold text-gray-800 mb-3">
-            More Games Coming Soon!
-          </h2>
-          <p className="text-gray-600">
-            We&apos;re constantly adding new games to our platform. Check back regularly for updates 
-            or suggest a game you&apos;d like to see added.
-          </p>
+        <div className="text-center mt-12">
+          <Link 
+            href="/" 
+            className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium"
+          >
+            ← Back to Home
+          </Link>
         </div>
       </div>
     </div>
