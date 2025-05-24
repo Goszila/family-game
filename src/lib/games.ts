@@ -27,6 +27,51 @@ export const GAMES: Game[] = [
     players: '1 Player',
     estimatedTime: '3-10 minutes',
     path: '/games/memory'
+  },
+  {
+    id: 'numberguessing',
+    name: 'Number Guessing',
+    description: 'Guess the secret number between 1-100 with hints!',
+    difficulty: 'Easy',
+    players: '1 Player',
+    estimatedTime: '2-5 minutes',
+    path: '/games/numberguessing'
+  },
+  {
+    id: 'simon',
+    name: 'Simon Says',
+    description: 'Remember and repeat the color sequence. How long can you go?',
+    difficulty: 'Medium',
+    players: '1 Player',
+    estimatedTime: '5-15 minutes',
+    path: '/games/simon'
+  },
+  {
+    id: 'snake',
+    name: 'Snake Game',
+    description: 'Classic arcade game! Eat food and grow your snake without hitting walls.',
+    difficulty: 'Medium',
+    players: '1 Player',
+    estimatedTime: '5-20 minutes',
+    path: '/games/snake'
+  },
+  {
+    id: 'wordscramble',
+    name: 'Word Scramble',
+    description: 'Unscramble the letters to form the correct word!',
+    difficulty: 'Medium',
+    players: '1 Player',
+    estimatedTime: '3-8 minutes',
+    path: '/games/wordscramble'
+  },
+  {
+    id: '2048',
+    name: '2048',
+    description: 'Slide tiles to combine numbers and reach the 2048 tile!',
+    difficulty: 'Hard',
+    players: '1 Player',
+    estimatedTime: '10-30 minutes',
+    path: '/games/2048'
   }
 ];
 
