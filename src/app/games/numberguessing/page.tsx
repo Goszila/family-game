@@ -12,7 +12,6 @@ export default function NumberGuessingPage() {
   const [maxAttempts] = useState(10);
   const [gameState, setGameState] = useState<GameState>('playing');
   const [hints, setHints] = useState<string[]>([]);
-  const [lastGuess, setLastGuess] = useState<number | null>(null);
 
   const resetGame = useCallback(() => {
     setSecretNumber(Math.floor(Math.random() * 100) + 1);
@@ -20,7 +19,6 @@ export default function NumberGuessingPage() {
     setAttempts(0);
     setGameState('playing');
     setHints([]);
-    setLastGuess(null);
   }, []);
 
   const makeGuess = () => {
@@ -33,7 +31,6 @@ export default function NumberGuessingPage() {
 
     const newAttempts = attempts + 1;
     setAttempts(newAttempts);
-    setLastGuess(guessNumber);
 
     if (guessNumber === secretNumber) {
       setGameState('won');
@@ -56,7 +53,7 @@ export default function NumberGuessingPage() {
       } else if (difference <= 15) {
         hint += 'Getting warmer! 🌡️';
       } else if (difference <= 30) {
-        hint += 'You\'re in the right area! 🎯';
+        hint += 'You&apos;re in the right area! 🎯';
       } else {
         hint += 'Way off! 🌨️';
       }
@@ -89,8 +86,8 @@ export default function NumberGuessingPage() {
         <div className="bg-blue-50 p-4 rounded-lg mb-6">
           <h3 className="font-semibold text-blue-800 mb-2">How to Play:</h3>
           <p className="text-blue-700 text-sm">
-            I'm thinking of a number between 1 and 100. You have {maxAttempts} attempts to guess it!
-            I'll give you hints after each guess.
+            I&apos;m thinking of a number between 1 and 100. You have {maxAttempts} attempts to guess it!
+            I&apos;ll give you hints after each guess.
           </p>
         </div>
 
@@ -143,7 +140,7 @@ export default function NumberGuessingPage() {
                   <span className={`font-bold ${getScoreColor()}`}>{attempts}</span> attempts!
                 </p>
                 <div className="mt-2 text-sm text-green-600">
-                  {attempts <= 3 && '🏆 Excellent! You\'re a mind reader!'}
+                  {attempts <= 3 && '🏆 Excellent! You&apos;re a mind reader!'}
                   {attempts > 3 && attempts <= 6 && '🎯 Great job! Nice guessing skills!'}
                   {attempts > 6 && '👍 Good work! You got there in the end!'}
                 </div>

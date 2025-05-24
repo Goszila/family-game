@@ -25,7 +25,7 @@ export default function SnakePage() {
     return 0;
   });
 
-  const gameLoopRef = useRef<NodeJS.Timeout>();
+  const gameLoopRef = useRef<NodeJS.Timeout | null>(null);
   const directionRef = useRef<Direction>(INITIAL_DIRECTION);
 
   const generateFood = useCallback((snakeBody: Position[]): Position => {
@@ -219,8 +219,7 @@ export default function SnakePage() {
         {/* Game Instructions */}
         <div className="bg-green-50 p-4 rounded-lg mb-6">
           <h3 className="font-semibold text-green-800 mb-2">How to Play:</h3>
-          <p className="text-green-700 text-sm">
-            Control the snake to eat food and grow longer. Don't hit the walls or yourself!
+          <p className="text-green-700 text-sm">              Control the snake to eat food and grow longer. Don&apos;t hit the walls or yourself!
             Use arrow keys, WASD, or the buttons below to move. Press SPACE to pause.
           </p>
         </div>

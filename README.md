@@ -9,12 +9,28 @@ A modern web game platform built with Next.js 15, TypeScript, and Tailwind CSS. 
 - **Responsive Design**: Works perfectly on desktop and mobile devices
 - **Client-Side Games**: All games run entirely in the browser
 - **Extensible Architecture**: Easy to add new games
+- **8 Different Games**: Strategy, arcade, memory, and word games
+- **Mobile Controls**: Touch-friendly controls for mobile devices
+- **Score Tracking**: Local high scores and progress tracking
+- **Keyboard Support**: Full keyboard controls for desktop users
 
 ## 🎲 Available Games
 
+### Strategy Games
 1. **Tic-Tac-Toe** - Classic 3x3 grid game for 2 players
-2. **Rock Paper Scissors** - Challenge the computer in this timeless game
-3. **Memory Matching** - Test your memory by finding matching pairs
+2. **2048** - Slide tiles to combine numbers and reach the 2048 tile!
+
+### Arcade Games
+3. **Rock Paper Scissors** - Challenge the computer in this timeless game
+4. **Snake Game** - Classic arcade game! Eat food and grow without hitting walls
+
+### Memory Games
+5. **Memory Matching** - Test your memory by finding matching pairs
+6. **Simon Says** - Remember and repeat the color sequence
+
+### Word & Number Games
+7. **Word Scramble** - Unscramble letters to form the correct word
+8. **Number Guessing** - Guess the secret number between 1-100 with hints
 
 ## 🚀 Getting Started
 
@@ -53,7 +69,12 @@ src/
 │   ├── games/             # Game routes
 │   │   ├── tictactoe/     # Tic-Tac-Toe game
 │   │   ├── rockpaperscissors/ # Rock Paper Scissors game
-│   │   └── memory/        # Memory matching game
+│   │   ├── memory/        # Memory matching game
+│   │   ├── simon/         # Simon Says memory game
+│   │   ├── snake/         # Snake arcade game
+│   │   ├── numberguessing/ # Number guessing game
+│   │   ├── wordscramble/  # Word scramble game
+│   │   └── 2048/          # 2048 sliding puzzle game
 │   ├── layout.tsx         # Root layout
 │   └── page.tsx          # Homepage
 ├── components/            # Reusable components
@@ -118,6 +139,26 @@ This project uses Tailwind CSS for styling. The design features:
 - Hover animations and transitions
 - Responsive grid layouts
 - Accessible color schemes
+
+## 🎮 Game Features
+
+Each game includes:
+
+- **Responsive Design**: Optimized for desktop and mobile
+- **Intuitive Controls**: Mouse, touch, and keyboard support
+- **Score Systems**: Points, streaks, and local high scores
+- **Visual Feedback**: Animations and state indicators
+- **Accessibility**: Clear instructions and keyboard navigation
+- **Difficulty Options**: Multiple levels where applicable
+
+### Game-Specific Features:
+
+- **Snake**: Real-time movement with WASD/arrow controls
+- **2048**: Smooth tile animations with merge effects  
+- **Simon Says**: Audio-visual patterns with increasing difficulty
+- **Word Scramble**: 3 difficulty levels with hints system
+- **Number Guessing**: Smart hint system with proximity indicators
+- **Memory Matching**: Card flip animations with move counting
 
 ## 🧩 Game Implementation Guidelines
 

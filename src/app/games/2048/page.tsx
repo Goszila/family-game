@@ -9,6 +9,122 @@ type Direction = 'up' | 'down' | 'left' | 'right';
 const GRID_SIZE = 4;
 const WIN_VALUE = 2048;
 
+function initializeBoard(): Board {
+  const newBoard = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(0));
+  addRandomTile(newBoard);
+  addRandomTile(newBoard);
+  return newBoard;
+}
+
+function addRandomTile(board: Board): void {
+  const emptyCells: [number, number][] = [];
+  
+  for (let row = 0; row < GRID_SIZE; row++) {
+    for (let col = 0; col < GRID_SIZE; col++) {
+      if (board[row][col] === 0) {
+        emptyCells.push([row, col]);
+      }
+    }
+  }
+
+  if (emptyCells.length > 0) {
+    const [row, col] = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+    board[row][col] = Math.random() < 0.9 ? 2 : 4;
+  }
+}
+
+const moveLeft = (board: Board): { board: Board; scoreGained: number; moved: boolean } => {
+  const newBoard = board.map(row => [...row]);
+  let scoreGained = 0;
+  let moved = false;
+
+  for (let row = 0; row < GRID_SIZE; row++) {
+    const originalRow = [...newBoard[row]];
+    
+    // Remove zeros
+    const filteredRow = newBoard[row].filter(val => val !== 0);
+    
+    // Merge adjacent equal values
+    for (let col = 0; col < filteredRow.length - 1; col++) {
+      if (filteredRow[col] === filteredRow[col + 1]) {
+        filteredRow[col] *= 2;
+        scoreGained += filteredRow[col];
+        filteredRow[col + 1] = 0;
+      }
+    }
+    
+    // Remove zeros again after merging
+    const finalRow = filteredRow.filter(val => val !== 0);
+    
+    // Pad with zeros
+    while (finalRow.length < GRID_SIZE) {
+      finalRow.push(0);
+    }
+    
+    newBoard[row] = finalRow;
+    
+    // Check if row changed
+    if (JSON.stringify(originalRow) !== JSON.stringify(finalRow)) {
+      moved = true;
+    }
+  }
+
+  return { board: newBoard, scoreGained, moved };
+};
+
+const moveRight = (board: Board): { board: Board; scoreGained: number; moved: boolean } => {
+  const reversedBoard = board.map(row => [...row].reverse());
+  const result = moveLeft(reversedBoard);
+  result.board = result.board.map(row => row.reverse());
+  return result;
+};
+
+const moveUp = (board: Board): { board: Board; scoreGained: number; moved: boolean } => {
+  // Transpose, move left, transpose back
+  const transposed = board[0].map((_, colIndex) => board.map(row => row[colIndex]));
+  const result = moveLeft(transposed);
+  result.board = result.board[0].map((_, colIndex) => result.board.map(row => row[colIndex]));
+  return result;
+};
+
+const moveDown = (board: Board): { board: Board; scoreGained: number; moved: boolean } => {
+  // Transpose, move right, transpose back
+  const transposed = board[0].map((_, colIndex) => board.map(row => row[colIndex]));
+  const result = moveRight(transposed);
+  result.board = result.board[0].map((_, colIndex) => result.board.map(row => row[colIndex]));
+  return result;
+};
+
+const canMove = (board: Board): boolean => {
+  // Check for empty cells
+  for (let row = 0; row < GRID_SIZE; row++) {
+    for (let col = 0; col < GRID_SIZE; col++) {
+      if (board[row][col] === 0) return true;
+    }
+  }
+
+  // Check for possible merges
+  for (let row = 0; row < GRID_SIZE; row++) {
+    for (let col = 0; col < GRID_SIZE; col++) {
+      const current = board[row][col];
+      if (
+        (row > 0 && board[row - 1][col] === current) ||
+        (row < GRID_SIZE - 1 && board[row + 1][col] === current) ||
+        (col > 0 && board[row][col - 1] === current) ||
+        (col < GRID_SIZE - 1 && board[row][col + 1] === current)
+      ) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+};
+
+const hasWon = (board: Board): boolean => {
+  return board.some(row => row.some(cell => cell >= WIN_VALUE));
+};
+
 export default function Game2048Page() {
   const [board, setBoard] = useState<Board>(() => initializeBoard());
   const [score, setScore] = useState(0);
@@ -21,128 +137,13 @@ export default function Game2048Page() {
   const [gameWon, setGameWon] = useState(false);
   const [gameOver, setGameOver] = useState(false);
 
-  function initializeBoard(): Board {
-    const newBoard = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(0));
-    addRandomTile(newBoard);
-    addRandomTile(newBoard);
-    return newBoard;
-  }
-
-  function addRandomTile(board: Board): void {
-    const emptyCells: [number, number][] = [];
-    
-    for (let row = 0; row < GRID_SIZE; row++) {
-      for (let col = 0; col < GRID_SIZE; col++) {
-        if (board[row][col] === 0) {
-          emptyCells.push([row, col]);
-        }
-      }
-    }
-
-    if (emptyCells.length > 0) {
-      const [row, col] = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-      board[row][col] = Math.random() < 0.9 ? 2 : 4;
-    }
-  }
-
   const resetGame = useCallback(() => {
-    setBoard(initializeBoard());
+    const newBoard = initializeBoard();
+    setBoard(newBoard);
     setScore(0);
     setGameWon(false);
     setGameOver(false);
   }, []);
-
-  const moveLeft = (board: Board): { board: Board; scoreGained: number; moved: boolean } => {
-    const newBoard = board.map(row => [...row]);
-    let scoreGained = 0;
-    let moved = false;
-
-    for (let row = 0; row < GRID_SIZE; row++) {
-      const originalRow = [...newBoard[row]];
-      
-      // Remove zeros
-      const filteredRow = newBoard[row].filter(val => val !== 0);
-      
-      // Merge adjacent equal values
-      for (let col = 0; col < filteredRow.length - 1; col++) {
-        if (filteredRow[col] === filteredRow[col + 1]) {
-          filteredRow[col] *= 2;
-          scoreGained += filteredRow[col];
-          filteredRow[col + 1] = 0;
-        }
-      }
-      
-      // Remove zeros again after merging
-      const finalRow = filteredRow.filter(val => val !== 0);
-      
-      // Pad with zeros
-      while (finalRow.length < GRID_SIZE) {
-        finalRow.push(0);
-      }
-      
-      newBoard[row] = finalRow;
-      
-      // Check if row changed
-      if (JSON.stringify(originalRow) !== JSON.stringify(finalRow)) {
-        moved = true;
-      }
-    }
-
-    return { board: newBoard, scoreGained, moved };
-  };
-
-  const moveRight = (board: Board): { board: Board; scoreGained: number; moved: boolean } => {
-    const reversedBoard = board.map(row => [...row].reverse());
-    const result = moveLeft(reversedBoard);
-    result.board = result.board.map(row => row.reverse());
-    return result;
-  };
-
-  const moveUp = (board: Board): { board: Board; scoreGained: number; moved: boolean } => {
-    // Transpose, move left, transpose back
-    const transposed = board[0].map((_, colIndex) => board.map(row => row[colIndex]));
-    const result = moveLeft(transposed);
-    result.board = result.board[0].map((_, colIndex) => result.board.map(row => row[colIndex]));
-    return result;
-  };
-
-  const moveDown = (board: Board): { board: Board; scoreGained: number; moved: boolean } => {
-    // Transpose, move right, transpose back
-    const transposed = board[0].map((_, colIndex) => board.map(row => row[colIndex]));
-    const result = moveRight(transposed);
-    result.board = result.board[0].map((_, colIndex) => result.board.map(row => row[colIndex]));
-    return result;
-  };
-
-  const canMove = (board: Board): boolean => {
-    // Check for empty cells
-    for (let row = 0; row < GRID_SIZE; row++) {
-      for (let col = 0; col < GRID_SIZE; col++) {
-        if (board[row][col] === 0) return true;
-      }
-    }
-
-    // Check for possible merges
-    for (let row = 0; row < GRID_SIZE; row++) {
-      for (let col = 0; col < GRID_SIZE; col++) {
-        const current = board[row][col];
-        if (
-          (row > 0 && board[row - 1][col] === current) ||
-          (row < GRID_SIZE - 1 && board[row + 1][col] === current) ||
-          (col > 0 && board[row][col - 1] === current) ||
-          (col < GRID_SIZE - 1 && board[row][col + 1] === current)
-        ) {
-          return true;
-        }
-      }
-    }
-
-    return false;
-  };
-
-  const hasWon = (board: Board): boolean => {
-    return board.some(row => row.some(cell => cell >= WIN_VALUE));
-  };
 
   const move = useCallback((direction: Direction) => {
     if (gameOver || (gameWon && !gameOver)) return;

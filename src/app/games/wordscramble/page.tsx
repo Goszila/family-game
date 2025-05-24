@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import GameLayout from '@/components/GameLayout';
 
 type Difficulty = 'easy' | 'medium' | 'hard';
