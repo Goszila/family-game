@@ -42,10 +42,201 @@ const ASTEROID_SPEEDS = { large: 1, medium: 2, small: 3 };
 const ASTEROID_SIZES = { large: 40, medium: 25, small: 15 };
 const MAX_ASTEROIDS = 8;
 
+// Sound system
+class SoundManager {
+  private audioContext: AudioContext | null = null;
+  private sounds: { [key: string]: AudioBuffer } = {};
+  private gainNode: GainNode | null = null;
+  private thrustOscillator: OscillatorNode | null = null;
+  private thrustGain: GainNode | null = null;
+  private isMuted = false;
+
+  async init() {
+    if (typeof window === 'undefined') return;
+    
+    try {
+      const AudioContextConstructor = window.AudioContext || (window as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (AudioContextConstructor) {
+        this.audioContext = new AudioContextConstructor();
+        this.gainNode = this.audioContext.createGain();
+        this.gainNode.connect(this.audioContext.destination);
+        this.gainNode.gain.value = 0.3; // Master volume
+        
+        // Create sound effects
+        await this.createSounds();
+      }
+    } catch (error) {
+      console.warn('Audio not supported:', error);
+    }
+  }
+
+  private async createSounds() {
+    if (!this.audioContext) return;
+
+    // Shooting sound
+    this.sounds.shoot = await this.createShootSound();
+    
+    // Explosion sounds
+    this.sounds.explosionLarge = await this.createExplosionSound(0.8, 200);
+    this.sounds.explosionMedium = await this.createExplosionSound(0.6, 300);
+    this.sounds.explosionSmall = await this.createExplosionSound(0.4, 400);
+    
+    // Ship explosion
+    this.sounds.shipExplosion = await this.createShipExplosionSound();
+    
+    // Level complete
+    this.sounds.levelComplete = await this.createLevelCompleteSound();
+  }
+
+  private async createShootSound(): Promise<AudioBuffer> {
+    if (!this.audioContext) throw new Error('No audio context');
+    
+    const duration = 0.1;
+    const sampleRate = this.audioContext.sampleRate;
+    const buffer = this.audioContext.createBuffer(1, duration * sampleRate, sampleRate);
+    const data = buffer.getChannelData(0);
+
+    for (let i = 0; i < buffer.length; i++) {
+      const t = i / sampleRate;
+      const envelope = Math.exp(-t * 20);
+      const frequency = 800 - t * 400;
+      data[i] = Math.sin(2 * Math.PI * frequency * t) * envelope * 0.3;
+    }
+
+    return buffer;
+  }
+
+  private async createExplosionSound(intensity: number, baseFreq: number): Promise<AudioBuffer> {
+    if (!this.audioContext) throw new Error('No audio context');
+    
+    const duration = 0.5;
+    const sampleRate = this.audioContext.sampleRate;
+    const buffer = this.audioContext.createBuffer(1, duration * sampleRate, sampleRate);
+    const data = buffer.getChannelData(0);
+
+    for (let i = 0; i < buffer.length; i++) {
+      const t = i / sampleRate;
+      const envelope = Math.exp(-t * 4);
+      const noise = (Math.random() - 0.5) * 2;
+      const tone = Math.sin(2 * Math.PI * baseFreq * t * (1 - t));
+      data[i] = (noise * 0.7 + tone * 0.3) * envelope * intensity * 0.4;
+    }
+
+    return buffer;
+  }
+
+  private async createShipExplosionSound(): Promise<AudioBuffer> {
+    if (!this.audioContext) throw new Error('No audio context');
+    
+    const duration = 1.0;
+    const sampleRate = this.audioContext.sampleRate;
+    const buffer = this.audioContext.createBuffer(1, duration * sampleRate, sampleRate);
+    const data = buffer.getChannelData(0);
+
+    for (let i = 0; i < buffer.length; i++) {
+      const t = i / sampleRate;
+      const envelope = Math.exp(-t * 2);
+      const noise = (Math.random() - 0.5) * 2;
+      const lowFreq = Math.sin(2 * Math.PI * 100 * t);
+      data[i] = (noise * 0.8 + lowFreq * 0.2) * envelope * 0.6;
+    }
+
+    return buffer;
+  }
+
+  private async createLevelCompleteSound(): Promise<AudioBuffer> {
+    if (!this.audioContext) throw new Error('No audio context');
+    
+    const duration = 1.0;
+    const sampleRate = this.audioContext.sampleRate;
+    const buffer = this.audioContext.createBuffer(1, duration * sampleRate, sampleRate);
+    const data = buffer.getChannelData(0);
+
+    const notes = [261.63, 329.63, 392.00, 523.25]; // C, E, G, C
+    
+    for (let i = 0; i < buffer.length; i++) {
+      const t = i / sampleRate;
+      const noteIndex = Math.floor(t * 4) % notes.length;
+      const frequency = notes[noteIndex];
+      const envelope = Math.exp(-t * 2) * Math.sin(Math.PI * t / duration);
+      data[i] = Math.sin(2 * Math.PI * frequency * t) * envelope * 0.3;
+    }
+
+    return buffer;
+  }
+
+  playSound(soundName: string) {
+    if (!this.audioContext || !this.gainNode || this.isMuted || !this.sounds[soundName]) return;
+
+    try {
+      const source = this.audioContext.createBufferSource();
+      source.buffer = this.sounds[soundName];
+      source.connect(this.gainNode);
+      source.start();
+    } catch (error) {
+      console.warn('Error playing sound:', error);
+    }
+  }
+
+  startThrust() {
+    if (!this.audioContext || !this.gainNode || this.isMuted) return;
+
+    try {
+      this.stopThrust(); // Stop any existing thrust sound
+      
+      this.thrustOscillator = this.audioContext.createOscillator();
+      this.thrustGain = this.audioContext.createGain();
+      
+      this.thrustOscillator.type = 'sawtooth';
+      this.thrustOscillator.frequency.setValueAtTime(80, this.audioContext.currentTime);
+      this.thrustOscillator.frequency.exponentialRampToValueAtTime(120, this.audioContext.currentTime + 0.1);
+      
+      this.thrustGain.gain.setValueAtTime(0, this.audioContext.currentTime);
+      this.thrustGain.gain.linearRampToValueAtTime(0.1, this.audioContext.currentTime + 0.05);
+      
+      this.thrustOscillator.connect(this.thrustGain);
+      this.thrustGain.connect(this.gainNode);
+      
+      this.thrustOscillator.start();
+    } catch (error) {
+      console.warn('Error starting thrust sound:', error);
+    }
+  }
+
+  stopThrust() {
+    if (this.thrustOscillator && this.thrustGain && this.audioContext) {
+      try {
+        this.thrustGain.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.05);
+        this.thrustOscillator.stop(this.audioContext.currentTime + 0.05);
+        this.thrustOscillator = null;
+        this.thrustGain = null;
+      } catch (error) {
+        console.warn('Error stopping thrust sound:', error);
+      }
+    }
+  }
+
+  setMute(muted: boolean) {
+    this.isMuted = muted;
+    if (muted) {
+      this.stopThrust();
+    }
+  }
+
+  getMuted() {
+    return this.isMuted;
+  }
+
+  isInitialized() {
+    return this.audioContext !== null;
+  }
+}
+
 export default function AsteroidsPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameLoopRef = useRef<number | null>(null);
   const keysRef = useRef<Set<string>>(new Set());
+  const soundManager = useRef<SoundManager>(new SoundManager());
 
   const [gameState, setGameState] = useState<'menu' | 'playing' | 'gameOver'>('menu');
   const [score, setScore] = useState(0);
@@ -56,6 +247,14 @@ export default function AsteroidsPage() {
     return 0;
   });
   const [level, setLevel] = useState(1);
+  const [isMuted, setIsMuted] = useState(false);
+
+  // Toggle mute function
+  const toggleMute = useCallback(() => {
+    const newMuteState = !isMuted;
+    setIsMuted(newMuteState);
+    soundManager.current.setMute(newMuteState);
+  }, [isMuted]);
 
   const ship = useRef<Ship>({
     x: CANVAS_WIDTH / 2,
@@ -104,7 +303,12 @@ export default function AsteroidsPage() {
     }
   }, [createAsteroid]);
 
-  const resetGame = useCallback(() => {
+  const resetGame = useCallback(async () => {
+    // Initialize sound system if not already done
+    if (!soundManager.current.isInitialized()) {
+      await soundManager.current.init();
+    }
+    
     ship.current = {
       x: CANVAS_WIDTH / 2,
       y: CANVAS_HEIGHT / 2,
@@ -140,7 +344,16 @@ export default function AsteroidsPage() {
     }
 
     // Handle thrust
+    const wasThrusting = s.thrust;
     s.thrust = keysRef.current.has('ArrowUp') || keysRef.current.has('w');
+    
+    // Sound effects for thrust
+    if (s.thrust && !wasThrusting) {
+      soundManager.current.startThrust();
+    } else if (!s.thrust && wasThrusting) {
+      soundManager.current.stopThrust();
+    }
+    
     if (s.thrust) {
       s.velocity.x += Math.cos(s.angle) * 0.5;
       s.velocity.y += Math.sin(s.angle) * 0.5;
@@ -188,6 +401,7 @@ export default function AsteroidsPage() {
 
   const shootBullet = useCallback(() => {
     const s = ship.current;
+    soundManager.current.playSound('shoot');
     bullets.current.push({
       x: s.x + Math.cos(s.angle) * SHIP_SIZE,
       y: s.y + Math.sin(s.angle) * SHIP_SIZE,
@@ -212,6 +426,15 @@ export default function AsteroidsPage() {
           // Remove bullet and asteroid
           bullets.current.splice(bulletIndex, 1);
           const hitAsteroid = asteroids.current.splice(asteroidIndex, 1)[0];
+          
+          // Play explosion sound based on asteroid size
+          if (hitAsteroid.size === 'large') {
+            soundManager.current.playSound('explosionLarge');
+          } else if (hitAsteroid.size === 'medium') {
+            soundManager.current.playSound('explosionMedium');
+          } else {
+            soundManager.current.playSound('explosionSmall');
+          }
           
           // Add score
           const points = asteroid.size === 'large' ? 20 : asteroid.size === 'medium' ? 50 : 100;
@@ -245,6 +468,10 @@ export default function AsteroidsPage() {
           ship.current.y = CANVAS_HEIGHT / 2;
           ship.current.velocity = { x: 0, y: 0 };
           
+          // Stop thrust sound and play ship explosion
+          soundManager.current.stopThrust();
+          soundManager.current.playSound('shipExplosion');
+          
           if (ship.current.lives <= 0) {
             setGameState('gameOver');
             if (score > highScore) {
@@ -259,6 +486,7 @@ export default function AsteroidsPage() {
 
   const checkLevelComplete = useCallback(() => {
     if (asteroids.current.length === 0) {
+      soundManager.current.playSound('levelComplete');
       setLevel(prev => prev + 1);
       const newAsteroidCount = Math.min(4 + level, MAX_ASTEROIDS);
       spawnAsteroids(newAsteroidCount);
@@ -437,6 +665,14 @@ export default function AsteroidsPage() {
               <div className="text-sm text-gray-400">High Score</div>
               <div className="text-xl font-bold text-yellow-400">{highScore}</div>
             </div>
+            <button
+              onClick={toggleMute}
+              className="px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors flex items-center gap-2"
+              title={isMuted ? "Unmute sounds" : "Mute sounds"}
+            >
+              {isMuted ? '🔇' : '🔊'}
+              <span className="text-sm">{isMuted ? 'Unmute' : 'Mute'}</span>
+            </button>
           </div>
         )}
 
