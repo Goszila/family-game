@@ -9,7 +9,7 @@ A modern web game platform built with Next.js 15, TypeScript, and Tailwind CSS. 
 - **Responsive Design**: Works perfectly on desktop and mobile devices
 - **Client-Side Games**: All games run entirely in the browser
 - **Extensible Architecture**: Easy to add new games
-- **8 Different Games**: Strategy, arcade, memory, and word games
+- **9 Different Games**: Strategy, arcade, memory, and word games
 - **Mobile Controls**: Touch-friendly controls for mobile devices
 - **Score Tracking**: Local high scores and progress tracking
 - **Keyboard Support**: Full keyboard controls for desktop users
@@ -23,14 +23,15 @@ A modern web game platform built with Next.js 15, TypeScript, and Tailwind CSS. 
 ### Arcade Games
 3. **Rock Paper Scissors** - Challenge the computer in this timeless game
 4. **Snake Game** - Classic arcade game! Eat food and grow without hitting walls
+5. **Asteroids** - Pilot your spaceship through space, destroying asteroids
 
 ### Memory Games
-5. **Memory Matching** - Test your memory by finding matching pairs
-6. **Simon Says** - Remember and repeat the color sequence
+6. **Memory Matching** - Test your memory by finding matching pairs
+7. **Simon Says** - Remember and repeat the color sequence
 
 ### Word & Number Games
-7. **Word Scramble** - Unscramble letters to form the correct word
-8. **Number Guessing** - Guess the secret number between 1-100 with hints
+8. **Word Scramble** - Unscramble letters to form the correct word
+9. **Number Guessing** - Guess the secret number between 1-100 with hints
 
 ## 🚀 Getting Started
 

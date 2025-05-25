@@ -72,6 +72,15 @@ export const GAMES: Game[] = [
     players: '1 Player',
     estimatedTime: '10-30 minutes',
     path: '/games/2048'
+  },
+  {
+    id: 'asteroids',
+    name: 'Asteroids',
+    description: 'Pilot your spaceship through space, destroying asteroids while avoiding collisions!',
+    difficulty: 'Hard',
+    players: '1 Player',
+    estimatedTime: '5-20 minutes',
+    path: '/games/asteroids'
   }
 ];
 
