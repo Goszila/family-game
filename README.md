@@ -13,6 +13,8 @@ A modern web game platform built with Next.js 15, TypeScript, and Tailwind CSS. 
 - **Mobile Controls**: Touch-friendly controls for mobile devices
 - **Score Tracking**: Local high scores and progress tracking
 - **Keyboard Support**: Full keyboard controls for desktop users
+- **Animated Background**: Beautiful floating game elements and particle effects
+- **Sound Effects**: Immersive audio feedback (with mute option)
 
 ## 🎲 Available Games
 
