@@ -38,7 +38,6 @@ interface Item {
 }
 
 interface AudioManager {
-  backgroundMusic: HTMLAudioElement | null;
   soundEffects: { [key: string]: HTMLAudioElement };
 }
 
@@ -62,7 +61,6 @@ const RPGGame: React.FC = () => {
   const [battleLog, setBattleLog] = useState<string[]>([]);
   const [isPlayerTurn, setIsPlayerTurn] = useState(true);
   const audioRef = useRef<AudioManager>({
-    backgroundMusic: null,
     soundEffects: {}
   });
 
@@ -137,11 +135,7 @@ const RPGGame: React.FC = () => {
   // Audio setup
   useEffect(() => {
     const setupAudio = () => {
-      // Create audio context for Web Audio API (better browser support)
       try {
-        // Background music (looped tones)
-        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-        
         audioRef.current.soundEffects = {
           attack: createSoundEffect([440, 330, 220], 0.3),
           victory: createSoundEffect([523, 659, 784], 0.5),
@@ -152,12 +146,6 @@ const RPGGame: React.FC = () => {
         };
 
         function createSoundEffect(frequencies: number[], duration: number): HTMLAudioElement {
-          // Create a simple beep sound using data URL
-          const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-          const oscillator = audioContext.createOscillator();
-          const gainNode = audioContext.createGain();
-          
-          // Create a simple audio element with a beep sound
           const audio = new Audio();
           audio.volume = 0.3;
           
@@ -193,7 +181,7 @@ const RPGGame: React.FC = () => {
             const t = i / sampleRate;
             let sample = 0;
             
-            frequencies.forEach((freq, index) => {
+            frequencies.forEach((freq) => {
               const envelope = Math.exp(-t * 3); // Decay envelope
               sample += Math.sin(2 * Math.PI * freq * t) * envelope * 0.3;
             });
@@ -207,8 +195,7 @@ const RPGGame: React.FC = () => {
           
           return audio;
         }
-      } catch (error) {
-        console.log('Audio context not supported, using fallback');
+      } catch {
         // Fallback for browsers that don't support Web Audio API
         audioRef.current.soundEffects = {
           attack: new Audio(),
@@ -233,7 +220,7 @@ const RPGGame: React.FC = () => {
           // Ignore audio play errors (user hasn't interacted yet)
         });
       }
-    } catch (error) {
+    } catch {
       // Ignore audio errors
     }
   };
@@ -327,7 +314,7 @@ const RPGGame: React.FC = () => {
     }
   };
 
-  const usePotion = (potionType: 'health' | 'mana') => {
+  const consumePotion = (potionType: 'health' | 'mana') => {
     const potion = character.inventory.find(item => 
       item.type === 'potion' && 
       (potionType === 'health' ? item.name.includes('Health') : item.name.includes('Mana'))
@@ -477,7 +464,7 @@ const RPGGame: React.FC = () => {
           </button>
           {character.inventory.some(item => item.name.includes('Health')) && (
             <button
-              onClick={() => usePotion('health')}
+              onClick={() => consumePotion('health')}
               className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded transition-colors"
             >
               🧪 Heal
@@ -485,7 +472,7 @@ const RPGGame: React.FC = () => {
           )}
           {character.inventory.some(item => item.name.includes('Mana')) && (
             <button
-              onClick={() => usePotion('mana')}
+              onClick={() => consumePotion('mana')}
               className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition-colors"
             >
               🔵 Mana
@@ -564,10 +551,7 @@ const RPGGame: React.FC = () => {
   );
 
   return (
-    <GameLayout
-      title="Fantasy RPG"
-      description="Embark on an epic adventure with battles, loot, and character progression!"
-    >
+    <GameLayout gameTitle="Fantasy RPG">
       <div className="max-w-4xl mx-auto p-4">
         {gameState === 'menu' && renderMenu()}
         {gameState === 'adventure' && renderAdventure()}
