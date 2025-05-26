@@ -81,6 +81,15 @@ export const GAMES: Game[] = [
     players: '1 Player',
     estimatedTime: '5-20 minutes',
     path: '/games/asteroids'
+  },
+  {
+    id: 'rpg',
+    name: 'Fantasy RPG',
+    description: 'Embark on an epic adventure! Battle monsters, collect loot, and level up your hero.',
+    difficulty: 'Medium',
+    players: '1 Player',
+    estimatedTime: '10-30 minutes',
+    path: '/games/rpg'
   }
 ];
 
